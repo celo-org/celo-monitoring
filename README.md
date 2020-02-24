@@ -10,6 +10,7 @@
          * [How to run the Monitoring Agent](#how-to-run-the-monitoring-agent)
          * [Configuring the Agent &amp; other components](#configuring-the-agent--other-components)
          * [How to run the Celo Monitoring Engine](#how-to-run-the-celo-monitoring-engine)
+         * [Celo Monitoring Engine Configuration](#celo-monitoring-engine-configuration)
          * [Monitoring Dashboard](#monitoring-dashboard)
       * [License](#license)
 
@@ -33,13 +34,15 @@ The solution is flexible to support the ingestion of additional sources of data 
 
 ## Architecture
 
-The solution architecture it's based in Keyko Web3 Monitoring Plaform and using the following Open Source components:
+The solution architecture it's based in Keyko Web3 Monitoring Platform and using the following Open Source components:
 
 - Keyko Web3 Monitoring Agent - Ingestion agent able to connect a network node and ingest all the data related to blocks, events, transactions and public state. The agent is configurable via API, allowing to extend the elements to fetch from the network.
 - Celo Monitoring Engine - Small processors in charge of data cleansing, cataloging and transformation facilitating further analysis and visualization. Based in Keyko Events Streamer framework.
 - Data Backbone -  Event driven data bus keeping all the incoming data and facilitating the event transformation and further persistence in real-time. Based in Kafka and Schema Registry of Confluent.  
 
 For storage  and visualization purposes, the processed data is saved in Elastic Search. Dashboards facilitating the visualization are built using Kibana.
+
+Further details can be found in the [architecture documentation page](docs/architecture.md).
 
 ### Data
 
@@ -165,6 +168,18 @@ mvn clean package
 java -jar target/celo-monitoring-engine.jar 
 ```
 
+### Celo Monitoring Engine Configuration
+The priority in the management of the configuration is to pass the java property in the following way:
+```-Dkafka.sink-suffix="_elastic"```
+If you are not passing in that way you can configure in your application conf to get the values as a environment variable. 
+To do that you have to pass the configuration in the following way and set the corresponding variable doing an `export SINK_SUFFIX=_elastic`:
+```hocon
+kafka{
+sink-suffix=${?SINK_SUFFIX}
+}
+``` 
+The other option is simple make the substitution in the application.conf file.
+
 ### Monitoring Dashboard
 
 All the data should be persisted automatically in Elastic Search. You should be able to check that data is available there with some of this urls:
@@ -181,7 +196,6 @@ http://localhost:9200/w3m-exchanged_elastic/_search?q=*
 ```
 
 Also it's available a Kibana dashboard showing some data with the information available:
-
 http://localhost:5601/app/kibana#/dashboards
 
 ![High Level View](docs/images/dashboard_view.png)
